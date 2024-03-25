@@ -5,6 +5,8 @@
 -- Dumped from database version 14.11 (Ubuntu 14.11-0ubuntu0.22.04.1)
 -- Dumped by pg_dump version 14.11 (Ubuntu 14.11-0ubuntu0.22.04.1)
 
+-- Started on 2024-03-25 18:20:12 -03
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -18,6 +20,7 @@ SET row_security = off;
 
 DROP DATABASE toquebrado;
 --
+-- TOC entry 3395 (class 1262 OID 57421)
 -- Name: toquebrado; Type: DATABASE; Schema: -; Owner: postgres
 --
 
@@ -40,6 +43,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- TOC entry 215 (class 1255 OID 57422)
 -- Name: atendimentos_anteriores(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -56,6 +60,7 @@ $_$;
 ALTER FUNCTION public.atendimentos_anteriores(character) OWNER TO postgres;
 
 --
+-- TOC entry 216 (class 1255 OID 57423)
 -- Name: faturamento_por_mes(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -79,6 +84,7 @@ $_$;
 ALTER FUNCTION public.faturamento_por_mes(integer) OWNER TO postgres;
 
 --
+-- TOC entry 217 (class 1255 OID 57424)
 -- Name: formata_cep(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -99,6 +105,7 @@ $_$;
 ALTER FUNCTION public.formata_cep(character) OWNER TO postgres;
 
 --
+-- TOC entry 218 (class 1255 OID 57425)
 -- Name: formata_telefone(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -118,6 +125,7 @@ $_$;
 ALTER FUNCTION public.formata_telefone(character) OWNER TO postgres;
 
 --
+-- TOC entry 219 (class 1255 OID 57426)
 -- Name: mascara_cpf(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -136,6 +144,7 @@ $_$;
 ALTER FUNCTION public.mascara_cpf(character) OWNER TO postgres;
 
 --
+-- TOC entry 220 (class 1255 OID 57427)
 -- Name: paciente_nro_atendimentos(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -152,6 +161,7 @@ $$;
 ALTER FUNCTION public.paciente_nro_atendimentos() OWNER TO postgres;
 
 --
+-- TOC entry 221 (class 1255 OID 57428)
 -- Name: transforma_para_horas(interval); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -175,6 +185,7 @@ $_$;
 ALTER FUNCTION public.transforma_para_horas(interval) OWNER TO postgres;
 
 --
+-- TOC entry 222 (class 1255 OID 57429)
 -- Name: valida_cpf(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -283,6 +294,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- TOC entry 209 (class 1259 OID 57430)
 -- Name: atendimento; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -303,6 +315,7 @@ CREATE TABLE public.atendimento (
 ALTER TABLE public.atendimento OWNER TO postgres;
 
 --
+-- TOC entry 210 (class 1259 OID 57438)
 -- Name: atendimento_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -318,6 +331,8 @@ CREATE SEQUENCE public.atendimento_id_seq
 ALTER TABLE public.atendimento_id_seq OWNER TO postgres;
 
 --
+-- TOC entry 3396 (class 0 OID 0)
+-- Dependencies: 210
 -- Name: atendimento_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -325,6 +340,7 @@ ALTER SEQUENCE public.atendimento_id_seq OWNED BY public.atendimento.id;
 
 
 --
+-- TOC entry 211 (class 1259 OID 57439)
 -- Name: fisioterapeuta; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -341,6 +357,7 @@ CREATE TABLE public.fisioterapeuta (
 ALTER TABLE public.fisioterapeuta OWNER TO postgres;
 
 --
+-- TOC entry 212 (class 1259 OID 57445)
 -- Name: fisioterapeuta_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -356,6 +373,8 @@ CREATE SEQUENCE public.fisioterapeuta_id_seq
 ALTER TABLE public.fisioterapeuta_id_seq OWNER TO postgres;
 
 --
+-- TOC entry 3397 (class 0 OID 0)
+-- Dependencies: 212
 -- Name: fisioterapeuta_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -363,6 +382,7 @@ ALTER SEQUENCE public.fisioterapeuta_id_seq OWNED BY public.fisioterapeuta.id;
 
 
 --
+-- TOC entry 213 (class 1259 OID 57446)
 -- Name: paciente; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -383,6 +403,7 @@ CREATE TABLE public.paciente (
 ALTER TABLE public.paciente OWNER TO postgres;
 
 --
+-- TOC entry 214 (class 1259 OID 57452)
 -- Name: paciente_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -398,6 +419,8 @@ CREATE SEQUENCE public.paciente_id_seq
 ALTER TABLE public.paciente_id_seq OWNER TO postgres;
 
 --
+-- TOC entry 3398 (class 0 OID 0)
+-- Dependencies: 214
 -- Name: paciente_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -405,6 +428,7 @@ ALTER SEQUENCE public.paciente_id_seq OWNED BY public.paciente.id;
 
 
 --
+-- TOC entry 3227 (class 2604 OID 57453)
 -- Name: atendimento id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -412,6 +436,7 @@ ALTER TABLE ONLY public.atendimento ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
+-- TOC entry 3229 (class 2604 OID 57454)
 -- Name: fisioterapeuta id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -419,6 +444,7 @@ ALTER TABLE ONLY public.fisioterapeuta ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
+-- TOC entry 3231 (class 2604 OID 57455)
 -- Name: paciente id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -426,6 +452,8 @@ ALTER TABLE ONLY public.paciente ALTER COLUMN id SET DEFAULT nextval('public.pac
 
 
 --
+-- TOC entry 3384 (class 0 OID 57430)
+-- Dependencies: 209
 -- Data for Name: atendimento; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -435,6 +463,8 @@ INSERT INTO public.atendimento VALUES (3, 1, 3, '2024-03-18 19:56:04.05183', '20
 
 
 --
+-- TOC entry 3386 (class 0 OID 57439)
+-- Dependencies: 211
 -- Data for Name: fisioterapeuta; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -442,6 +472,8 @@ INSERT INTO public.fisioterapeuta VALUES (1, 'FLAVIO SANTOS', '17658586072', 'OI
 
 
 --
+-- TOC entry 3388 (class 0 OID 57446)
+-- Dependencies: 213
 -- Data for Name: paciente; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -451,6 +483,8 @@ INSERT INTO public.paciente VALUES (3, 'KATIANE
 
 
 --
+-- TOC entry 3399 (class 0 OID 0)
+-- Dependencies: 210
 -- Name: atendimento_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -458,6 +492,8 @@ SELECT pg_catalog.setval('public.atendimento_id_seq', 3, true);
 
 
 --
+-- TOC entry 3400 (class 0 OID 0)
+-- Dependencies: 212
 -- Name: fisioterapeuta_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -465,6 +501,8 @@ SELECT pg_catalog.setval('public.fisioterapeuta_id_seq', 2, true);
 
 
 --
+-- TOC entry 3401 (class 0 OID 0)
+-- Dependencies: 214
 -- Name: paciente_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -472,6 +510,7 @@ SELECT pg_catalog.setval('public.paciente_id_seq', 3, true);
 
 
 --
+-- TOC entry 3234 (class 2606 OID 57457)
 -- Name: atendimento atendimento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -480,6 +519,7 @@ ALTER TABLE ONLY public.atendimento
 
 
 --
+-- TOC entry 3236 (class 2606 OID 57459)
 -- Name: fisioterapeuta fisioterapeuta_cpf_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -488,6 +528,7 @@ ALTER TABLE ONLY public.fisioterapeuta
 
 
 --
+-- TOC entry 3238 (class 2606 OID 57461)
 -- Name: fisioterapeuta fisioterapeuta_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -496,6 +537,7 @@ ALTER TABLE ONLY public.fisioterapeuta
 
 
 --
+-- TOC entry 3240 (class 2606 OID 57463)
 -- Name: paciente paciente_cpf_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -504,6 +546,7 @@ ALTER TABLE ONLY public.paciente
 
 
 --
+-- TOC entry 3242 (class 2606 OID 57465)
 -- Name: paciente paciente_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -512,6 +555,7 @@ ALTER TABLE ONLY public.paciente
 
 
 --
+-- TOC entry 3243 (class 2606 OID 57466)
 -- Name: atendimento atendimento_fisioterapeuta_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -520,12 +564,15 @@ ALTER TABLE ONLY public.atendimento
 
 
 --
+-- TOC entry 3244 (class 2606 OID 57471)
 -- Name: atendimento atendimento_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.atendimento
     ADD CONSTRAINT atendimento_paciente_id_fkey FOREIGN KEY (paciente_id) REFERENCES public.paciente(id);
 
+
+-- Completed on 2024-03-25 18:20:12 -03
 
 --
 -- PostgreSQL database dump complete

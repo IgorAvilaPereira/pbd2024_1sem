@@ -5,7 +5,7 @@
 -- Dumped from database version 14.11 (Ubuntu 14.11-0ubuntu0.22.04.1)
 -- Dumped by pg_dump version 14.11 (Ubuntu 14.11-0ubuntu0.22.04.1)
 
--- Started on 2024-03-25 18:20:12 -03
+-- Started on 2024-03-25 20:19:53 -03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -20,7 +20,7 @@ SET row_security = off;
 
 DROP DATABASE toquebrado;
 --
--- TOC entry 3395 (class 1262 OID 57421)
+-- TOC entry 3400 (class 1262 OID 57421)
 -- Name: toquebrado; Type: DATABASE; Schema: -; Owner: postgres
 --
 
@@ -60,11 +60,11 @@ $_$;
 ALTER FUNCTION public.atendimentos_anteriores(character) OWNER TO postgres;
 
 --
--- TOC entry 216 (class 1255 OID 57423)
--- Name: faturamento_por_mes(integer); Type: FUNCTION; Schema: public; Owner: postgres
+-- TOC entry 234 (class 1255 OID 57476)
+-- Name: faturamento_por_ano(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.faturamento_por_mes(integer) RETURNS money
+CREATE FUNCTION public.faturamento_por_ano(integer) RETURNS money
     LANGUAGE plpgsql
     AS $_$
 DECLARE
@@ -72,7 +72,7 @@ DECLARE
 	registro record;
 BEGIN
 	somatorio := 0;
-	for registro in select atendimento.id, valor_consulta+valor_por_hora_fisioterapeuta*transforma_para_horas(data_hora_fim-data_hora_inicio) as vl_consulta from atendimento where extract(month from atendimento.data_hora_inicio) = $1 AND data_hora_fim is not null loop
+	for registro in select atendimento.id, valor_consulta+valor_por_hora_fisioterapeuta*transforma_para_horas(data_hora_fim-data_hora_inicio) as vl_consulta from atendimento where extract(year from atendimento.data_hora_inicio) = $1 and data_hora_fim is not null loop
 		raise notice '%', registro.vl_consulta;
 		somatorio := somatorio + registro.vl_consulta;
 	end loop;
@@ -81,10 +81,104 @@ END;
 $_$;
 
 
-ALTER FUNCTION public.faturamento_por_mes(integer) OWNER TO postgres;
+ALTER FUNCTION public.faturamento_por_ano(integer) OWNER TO postgres;
 
 --
--- TOC entry 217 (class 1255 OID 57424)
+-- TOC entry 235 (class 1255 OID 57480)
+-- Name: faturamento_por_mes(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.faturamento_por_mes(mes integer, ano integer) RETURNS money
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	somatorio money;
+	registro record;
+BEGIN
+	somatorio := 0;
+	for registro in select atendimento.id, valor_consulta+valor_por_hora_fisioterapeuta*transforma_para_horas(data_hora_fim-data_hora_inicio) as vl_consulta from atendimento where extract(year from atendimento.data_hora_inicio) = ano and extract(month from atendimento.data_hora_inicio) = mes AND data_hora_fim is not null loop
+		raise notice '%', registro.vl_consulta;
+		somatorio := somatorio + registro.vl_consulta;
+	end loop;
+	return somatorio;	
+END;
+$$;
+
+
+ALTER FUNCTION public.faturamento_por_mes(mes integer, ano integer) OWNER TO postgres;
+
+--
+-- TOC entry 233 (class 1255 OID 57479)
+-- Name: faturamento_por_semana(date); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.faturamento_por_semana(date) RETURNS money
+    LANGUAGE plpgsql
+    AS $_$
+DECLARE
+	somatorio money;
+	registro record;
+BEGIN
+	somatorio := 0;
+	for registro in select atendimento.id, valor_consulta+valor_por_hora_fisioterapeuta*transforma_para_horas(data_hora_fim-data_hora_inicio) as vl_consulta from atendimento where (cast(atendimento.data_hora_inicio as date) between $1 AND $1 + interval '7 days') and data_hora_fim is not null loop
+		raise notice '%', registro.vl_consulta;
+		somatorio := somatorio + registro.vl_consulta;
+	end loop;
+	return somatorio;	
+END;
+$_$;
+
+
+ALTER FUNCTION public.faturamento_por_semana(date) OWNER TO postgres;
+
+--
+-- TOC entry 238 (class 1255 OID 57501)
+-- Name: fisioterapeuta_mais_atendimentos(date, date); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fisioterapeuta_mais_atendimentos(data_inicio date, data_fim date) RETURNS TABLE(id integer, nome character varying, qtde bigint)
+    LANGUAGE plpgsql
+    AS $_$
+begin
+	return query 
+select
+	fisioterapeuta.id,
+	fisioterapeuta.nome,
+	count(*)
+from
+	fisioterapeuta
+inner join atendimento 
+on
+	(fisioterapeuta.id = atendimento.fisioterapeuta_id)
+where
+	cast(atendimento.data_hora_inicio as date) between $1 and $2
+group by
+	fisioterapeuta.id
+having
+	count(*) = (
+	select
+		count(*)
+	from
+		fisioterapeuta
+	inner join atendimento 
+on
+		(fisioterapeuta.id = atendimento.fisioterapeuta_id)
+	where
+		cast(atendimento.data_hora_inicio as date) between $1 and $2
+	group by
+		fisioterapeuta.id
+	order by
+		count(*) desc
+	limit 1);
+end;
+
+$_$;
+
+
+ALTER FUNCTION public.fisioterapeuta_mais_atendimentos(data_inicio date, data_fim date) OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1255 OID 57424)
 -- Name: formata_cep(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -105,7 +199,7 @@ $_$;
 ALTER FUNCTION public.formata_cep(character) OWNER TO postgres;
 
 --
--- TOC entry 218 (class 1255 OID 57425)
+-- TOC entry 217 (class 1255 OID 57425)
 -- Name: formata_telefone(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -125,7 +219,7 @@ $_$;
 ALTER FUNCTION public.formata_telefone(character) OWNER TO postgres;
 
 --
--- TOC entry 219 (class 1255 OID 57426)
+-- TOC entry 218 (class 1255 OID 57426)
 -- Name: mascara_cpf(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -144,7 +238,95 @@ $_$;
 ALTER FUNCTION public.mascara_cpf(character) OWNER TO postgres;
 
 --
--- TOC entry 220 (class 1255 OID 57427)
+-- TOC entry 237 (class 1255 OID 57497)
+-- Name: melhor_fisioterapeuta(date, date); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.melhor_fisioterapeuta(data_inicio date, data_fim date) RETURNS TABLE(id integer, media double precision)
+    LANGUAGE plpgsql
+    AS $_$
+begin
+--	exemplo de chamada
+--	select * from melhor_fisioterapeuta(cast('2024-03-01' as date), cast('2024-03-31' as date));
+
+	return query 
+select
+	fisioterapeuta.id,
+	cast(sum(nota) as real)/(
+	select
+		count(*)
+	from
+		atendimento as real) as media
+from
+	fisioterapeuta
+inner join atendimento 
+on
+	(fisioterapeuta.id = atendimento.fisioterapeuta_id)
+where
+	cast(atendimento.data_hora_inicio as date) between $1 and $2
+group by
+	fisioterapeuta.id
+having
+	cast(sum(nota) as real)/(
+	select
+		count(*)
+	from
+		atendimento as real) = 
+	(
+	select
+		cast(sum(nota) as real)/(
+		select
+			count(*)
+		from
+			atendimento as real) as media
+	from
+		fisioterapeuta
+	inner join atendimento on
+		(fisioterapeuta.id = atendimento.fisioterapeuta_id)
+	where
+		cast(atendimento.data_hora_inicio as date) between $1 and $2
+	group by
+		fisioterapeuta.id
+	order by
+		media desc
+	limit 1);
+end;
+$_$;
+
+
+ALTER FUNCTION public.melhor_fisioterapeuta(data_inicio date, data_fim date) OWNER TO postgres;
+
+--
+-- TOC entry 236 (class 1255 OID 57481)
+-- Name: mes_mais_rentavel(integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.mes_mais_rentavel(ano integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	mes_mais_rentavel integer := 0;
+	valor money;
+	valor_mais_rentavel money := 0;
+	i integer := 1;	
+BEGIN
+	while (i <= 12) LOOP
+		valor := faturamento_por_mes(i, ano);
+		if (valor >= valor_mais_rentavel) THEN
+			mes_mais_rentavel := i;
+			valor_mais_rentavel := valor;
+		END IF;
+		i := i + 1;
+	END LOOP;
+	return mes_mais_rentavel;
+END;
+$$;
+
+
+ALTER FUNCTION public.mes_mais_rentavel(ano integer) OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1255 OID 57427)
 -- Name: paciente_nro_atendimentos(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -161,7 +343,7 @@ $$;
 ALTER FUNCTION public.paciente_nro_atendimentos() OWNER TO postgres;
 
 --
--- TOC entry 221 (class 1255 OID 57428)
+-- TOC entry 220 (class 1255 OID 57428)
 -- Name: transforma_para_horas(interval); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -185,7 +367,7 @@ $_$;
 ALTER FUNCTION public.transforma_para_horas(interval) OWNER TO postgres;
 
 --
--- TOC entry 222 (class 1255 OID 57429)
+-- TOC entry 221 (class 1255 OID 57429)
 -- Name: valida_cpf(character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -302,8 +484,8 @@ CREATE TABLE public.atendimento (
     id integer NOT NULL,
     fisioterapeuta_id integer,
     paciente_id integer,
-    data_hora_inicio timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    data_hora_fim timestamp without time zone,
+    data_hora_inicio timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    data_hora_fim timestamp with time zone,
     observacao text,
     nota integer,
     valor_consulta money DEFAULT 100,
@@ -331,7 +513,7 @@ CREATE SEQUENCE public.atendimento_id_seq
 ALTER TABLE public.atendimento_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3396 (class 0 OID 0)
+-- TOC entry 3401 (class 0 OID 0)
 -- Dependencies: 210
 -- Name: atendimento_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -373,7 +555,7 @@ CREATE SEQUENCE public.fisioterapeuta_id_seq
 ALTER TABLE public.fisioterapeuta_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3397 (class 0 OID 0)
+-- TOC entry 3402 (class 0 OID 0)
 -- Dependencies: 212
 -- Name: fisioterapeuta_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -419,7 +601,7 @@ CREATE SEQUENCE public.paciente_id_seq
 ALTER TABLE public.paciente_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3398 (class 0 OID 0)
+-- TOC entry 3403 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: paciente_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -428,7 +610,7 @@ ALTER SEQUENCE public.paciente_id_seq OWNED BY public.paciente.id;
 
 
 --
--- TOC entry 3227 (class 2604 OID 57453)
+-- TOC entry 3231 (class 2604 OID 57453)
 -- Name: atendimento id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -436,7 +618,7 @@ ALTER TABLE ONLY public.atendimento ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3229 (class 2604 OID 57454)
+-- TOC entry 3234 (class 2604 OID 57454)
 -- Name: fisioterapeuta id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -444,7 +626,7 @@ ALTER TABLE ONLY public.fisioterapeuta ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3231 (class 2604 OID 57455)
+-- TOC entry 3236 (class 2604 OID 57455)
 -- Name: paciente id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -452,27 +634,29 @@ ALTER TABLE ONLY public.paciente ALTER COLUMN id SET DEFAULT nextval('public.pac
 
 
 --
--- TOC entry 3384 (class 0 OID 57430)
+-- TOC entry 3389 (class 0 OID 57430)
 -- Dependencies: 209
 -- Data for Name: atendimento; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.atendimento VALUES (1, 1, 1, '2024-03-04 20:02:59.936992', '2024-03-04 22:02:59.936992', NULL, 5, 'R$ 100,00', 'R$ 100,00');
-INSERT INTO public.atendimento VALUES (2, 1, 3, '2024-03-18 19:19:10.925309', '2024-03-18 21:19:10.925309', NULL, NULL, 'R$ 100,00', 'R$ 100,00');
-INSERT INTO public.atendimento VALUES (3, 1, 3, '2024-03-18 19:56:04.05183', '2024-03-18 20:25:23.734915', NULL, NULL, 'R$ 100,00', 'R$ 100,00');
+INSERT INTO public.atendimento VALUES (2, 1, 3, '2024-03-18 19:19:10.925309-03', '2024-03-18 21:19:10.925309-03', NULL, 2, 'R$ 100,00', 'R$ 100,00');
+INSERT INTO public.atendimento VALUES (3, 1, 3, '2024-03-18 19:56:04.05183-03', '2024-03-18 20:25:23.734915-03', NULL, 1, 'R$ 100,00', 'R$ 100,00');
+INSERT INTO public.atendimento VALUES (1, 1, 1, '2024-03-04 20:02:59.936992-03', '2024-03-04 22:02:59.936992-03', NULL, 1, 'R$ 100,00', 'R$ 100,00');
+INSERT INTO public.atendimento VALUES (4, 4, 1, '2024-03-25 19:28:30.095495-03', '2024-03-25 21:33:14.41186-03', NULL, 4, 'R$ 150,00', 'R$ 150,00');
 
 
 --
--- TOC entry 3386 (class 0 OID 57439)
+-- TOC entry 3391 (class 0 OID 57439)
 -- Dependencies: 211
 -- Data for Name: fisioterapeuta; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO public.fisioterapeuta VALUES (1, 'FLAVIO SANTOS', '17658586072', 'OIAUFJIOSDUFOISD', 'R$ 100,00');
+INSERT INTO public.fisioterapeuta VALUES (4, 'JOHN MCLANE', '99453730050', 'USIFIOSDUFIOS', 'R$ 150,00');
 
 
 --
--- TOC entry 3388 (class 0 OID 57446)
+-- TOC entry 3393 (class 0 OID 57446)
 -- Dependencies: 213
 -- Data for Name: paciente; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -483,25 +667,25 @@ INSERT INTO public.paciente VALUES (3, 'KATIANE
 
 
 --
--- TOC entry 3399 (class 0 OID 0)
+-- TOC entry 3404 (class 0 OID 0)
 -- Dependencies: 210
 -- Name: atendimento_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.atendimento_id_seq', 3, true);
+SELECT pg_catalog.setval('public.atendimento_id_seq', 6, true);
 
 
 --
--- TOC entry 3400 (class 0 OID 0)
+-- TOC entry 3405 (class 0 OID 0)
 -- Dependencies: 212
 -- Name: fisioterapeuta_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.fisioterapeuta_id_seq', 2, true);
+SELECT pg_catalog.setval('public.fisioterapeuta_id_seq', 4, true);
 
 
 --
--- TOC entry 3401 (class 0 OID 0)
+-- TOC entry 3406 (class 0 OID 0)
 -- Dependencies: 214
 -- Name: paciente_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -510,7 +694,7 @@ SELECT pg_catalog.setval('public.paciente_id_seq', 3, true);
 
 
 --
--- TOC entry 3234 (class 2606 OID 57457)
+-- TOC entry 3239 (class 2606 OID 57457)
 -- Name: atendimento atendimento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -519,7 +703,7 @@ ALTER TABLE ONLY public.atendimento
 
 
 --
--- TOC entry 3236 (class 2606 OID 57459)
+-- TOC entry 3241 (class 2606 OID 57459)
 -- Name: fisioterapeuta fisioterapeuta_cpf_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -528,7 +712,7 @@ ALTER TABLE ONLY public.fisioterapeuta
 
 
 --
--- TOC entry 3238 (class 2606 OID 57461)
+-- TOC entry 3243 (class 2606 OID 57461)
 -- Name: fisioterapeuta fisioterapeuta_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -537,7 +721,7 @@ ALTER TABLE ONLY public.fisioterapeuta
 
 
 --
--- TOC entry 3240 (class 2606 OID 57463)
+-- TOC entry 3245 (class 2606 OID 57463)
 -- Name: paciente paciente_cpf_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -546,7 +730,7 @@ ALTER TABLE ONLY public.paciente
 
 
 --
--- TOC entry 3242 (class 2606 OID 57465)
+-- TOC entry 3247 (class 2606 OID 57465)
 -- Name: paciente paciente_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -555,7 +739,7 @@ ALTER TABLE ONLY public.paciente
 
 
 --
--- TOC entry 3243 (class 2606 OID 57466)
+-- TOC entry 3248 (class 2606 OID 57466)
 -- Name: atendimento atendimento_fisioterapeuta_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -564,7 +748,7 @@ ALTER TABLE ONLY public.atendimento
 
 
 --
--- TOC entry 3244 (class 2606 OID 57471)
+-- TOC entry 3249 (class 2606 OID 57471)
 -- Name: atendimento atendimento_paciente_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -572,7 +756,7 @@ ALTER TABLE ONLY public.atendimento
     ADD CONSTRAINT atendimento_paciente_id_fkey FOREIGN KEY (paciente_id) REFERENCES public.paciente(id);
 
 
--- Completed on 2024-03-25 18:20:12 -03
+-- Completed on 2024-03-25 20:19:53 -03
 
 --
 -- PostgreSQL database dump complete

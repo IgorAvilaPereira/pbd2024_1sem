@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <table border="1">
+
+        {{#vetAnotacaoDTO}}
+
+        <tr>
+            <td>{{id}}</td>
+            <td>{{titulo}}</td>
+            <td>{{texto}}</td>
+            <td>{{dataHoraCriacao}}</td>
+            <td>{{dataHoraAviso}}</td>
+            <td><a href="/copiar/{{id}}">Copiar</a></td>
+            <td><a href="/enviar_lixeira/{{id}}">Lixeira</a></td>
+
+        </tr>
+        {{/vetAnotacaoDTO}}
+    </table>
+</body>
+</html>

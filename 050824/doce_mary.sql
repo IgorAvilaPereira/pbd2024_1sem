@@ -76,3 +76,11 @@ FOR EACH ROW EXECUTE PROCEDURE testa_estoque();
 CREATE TRIGGER testa_estoque_trigger2 BEFORE DELETE on item 
 FOR EACH ROW EXECUTE PROCEDURE testa_estoque();
 
+-- teste insert
+--INSERT INTO item (pedido_id, doce_id, qtde, preco_unitario_atual) VALUES (1, 1,100,1.99);
+--
+-- teste update
+--UPDATE item set qtde = 99;
+--
+-- teste delete
+--DELETE FROM item;
